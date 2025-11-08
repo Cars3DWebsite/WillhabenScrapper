@@ -57,5 +57,5 @@ USER appuser
 # Expose port
 EXPOSE 5000
 
-# Run with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "--threads", "2", "--timeout", "120", "app:app"]
+# Run the Flask application directly so background jobs share the same process
+CMD ["python", "app.py"]
