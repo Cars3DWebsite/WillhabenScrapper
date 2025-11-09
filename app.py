@@ -1216,6 +1216,27 @@ def configure_app():
 configure_app()
 
 
+# Test database connection
+def test_database_connection():
+    """Test database connection on startup."""
+    try:
+        with app.app_context():
+            # Simple query to test connection
+            result = db.session.execute(text('SELECT 1')).fetchone()
+            logger.info(f"✅ Database connection successful! Test query result: {result}")
+            
+            # Log connection string (redacted)
+            redacted_url = DATABASE_URL.split('@')[1] if '@' in DATABASE_URL else 'local'
+            logger.info(f"Connected to database at: ...@{redacted_url}")
+    except Exception as e:
+        logger.error(f"❌ Database connection FAILED: {str(e)}")
+        logger.error(f"DATABASE_URL present: {bool(os.getenv('DATABASE_URL'))}")
+        raise
+
+
+test_database_connection()
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     logger.info(f"Starting Flask server on port {port}")
