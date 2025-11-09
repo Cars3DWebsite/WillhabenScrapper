@@ -1,7 +1,6 @@
-# Dockerfile (Alternative)
-FROM python:3.11-bookworm
+FROM python:3.11-slim
 
-# Install system dependencies for Playwright and PostgreSQL
+# Install system dependencies for Playwright
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
@@ -25,37 +24,23 @@ RUN apt-get update && apt-get install -y \
     libxkbcommon0 \
     libxrandr2 \
     xdg-utils \
-    libu2f-udev \
-    libvulkan1 \
-    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
 WORKDIR /app
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Playwright browsers BEFORE creating non-root user
+# Install Playwright browsers
 RUN playwright install chromium
 RUN playwright install-deps chromium
 
 # Copy application code
 COPY . .
 
-# Create a non-root user and give access to Playwright cache
-RUN useradd -m -u 1000 appuser && \
-    mkdir -p /home/appuser/.cache && \
-    cp -r /root/.cache/ms-playwright /home/appuser/.cache/ && \
-    chown -R appuser:appuser /home/appuser/.cache && \
-    chown -R appuser:appuser /app
-
-# Switch to non-root user
-USER appuser
-
 # Expose port
 EXPOSE 5000
 
-# Run the Flask application directly so background jobs share the same process
+# Run the application
 CMD ["python", "app.py"]
